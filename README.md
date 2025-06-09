@@ -1,1 +1,1 @@
-# coding-project-template
+# django app with docker/kubernetes deployment
