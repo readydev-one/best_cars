@@ -14,7 +14,15 @@ import logging
 import json
 from django.views.decorators.csrf import csrf_exempt
 # from .populate import initiate
-
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
+from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+from datetime import datetime
+import json
+import logging
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -24,22 +32,37 @@ logger = logging.getLogger(__name__)
 
 # Create a `login_request` view to handle sign in request
 @csrf_exempt
-def login_user(request):
-    # Get username and password from request.POST dictionary
-    data = json.loads(request.body)
-    username = data['userName']
-    password = data['password']
-    # Try to check if provide credential can be authenticated
-    user = authenticate(username=username, password=password)
-    data = {"userName": username}
-    if user is not None:
-        # If user is valid, call login method to login current user
-        login(request, user)
-        data = {"userName": username, "status": "Authenticated"}
-    return JsonResponse(data)
+async def login_user(request):
+    if request.method == "POST":
+        # Read the body asynchronously
+        body = await request.body
+        data = json.loads(body)
+
+        username = data.get('userName')
+        password = data.get('password')
+
+        # Authenticate asynchronously
+        user = await sync_to_async(authenticate)(username=username, password=password)
+        response_data = {"userName": username}
+
+        if user is not None:
+            # Login asynchronously
+            await sync_to_async(login)(request, user)
+            response_data["status"] = "Authenticated"
+        else:
+            response_data["status"] = "Invalid credentials"
+
+        return JsonResponse(response_data)
+
+    return JsonResponse({"error": "Only POST method is allowed"}, status=405)
 
 # Create a `logout_request` view to handle sign out request
-# def logout_request(request):
+@csrf_exempt
+async def logout_user(request):
+    if request.method == "POST":
+        await sync_to_async(logout)(request)
+        return JsonResponse({"status": "Logged out"})
+    return JsonResponse({"error": "Only POST method is allowed"}, status=405)
 # ...
 
 # Create a `registration` view to handle sign up request
