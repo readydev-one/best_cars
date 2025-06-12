@@ -8,12 +8,8 @@
 # from django.contrib import messages
 # from datetime import datetime
 
-from django.http import JsonResponse
-from django.contrib.auth import login, authenticate
-import logging
-import json
-from django.views.decorators.csrf import csrf_exempt
-# from .populate import initiate
+
+from .populate import initiate
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
 from django.contrib.auth import login, authenticate, logout
@@ -32,38 +28,25 @@ logger = logging.getLogger(__name__)
 
 # Create a `login_request` view to handle sign in request
 @csrf_exempt
-async def login_user(request):
+def login_user(request):
     if request.method == "POST":
-        # Read the body asynchronously
-        body = await request.body
-        data = json.loads(body)
-
+        data = json.loads(request.body)
         username = data.get('userName')
         password = data.get('password')
-
-        # Authenticate asynchronously
-        user = await sync_to_async(authenticate)(username=username, password=password)
-        response_data = {"userName": username}
-
+        user = authenticate(username=username, password=password)
         if user is not None:
-            # Login asynchronously
-            await sync_to_async(login)(request, user)
-            response_data["status"] = "Authenticated"
+            login(request, user)
+            return JsonResponse({"userName": username, "status": "Authenticated"})
         else:
-            response_data["status"] = "Invalid credentials"
-
-        return JsonResponse(response_data)
-
+            return JsonResponse({"userName": username, "status": "Invalid credentials"})
     return JsonResponse({"error": "Only POST method is allowed"}, status=405)
 
 # Create a `logout_request` view to handle sign out request
 @csrf_exempt
-async def logout_user(request):
-    if request.method == "POST":
-        await sync_to_async(logout)(request)
-        return JsonResponse({"status": "Logged out"})
-    return JsonResponse({"error": "Only POST method is allowed"}, status=405)
-# ...
+def logout_request(request):
+    logout(request) # Terminate user session
+    data = {"userName":""} # Return empty username
+    return JsonResponse(data)
 
 # Create a `registration` view to handle sign up request
 # @csrf_exempt
