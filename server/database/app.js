@@ -68,23 +68,24 @@ try{
 
 // Express route to fetch Dealers by a particular state
 app.get('/fetchDealers/:state', async (req, res) => {
-try {
+  try {
     const state = req.params.state;
-    const dealers = await Dealerships.find({ state: state});
-    if (!state || state.trim() ==="") {
-        return res.status(400).json
- is requiredtereyState param: ''rerro({})    }
-    res.status(200).json(dealers);
-}   catch (err) {
-    res.status(500).json({error: 'Failed to fetch dealers by state'})
+    if (!state || state.trim() === "") {
+      return res.status(400).json({ error: 'State parameter is required' });
     }
+    const dealers = await Dealerships.find({ state: state });
+    res.status(200).json(dealers);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch dealers by state' });
+  }
 });
 
 // Express route to fetch dealer by a particular id
 app.get('/fetchDealer/:id', async (req, res) => {
     try {
       const id = req.params.id;
-      const dealer = await Dealer.findById(id);
+      
+      const dealer = await Dealerships.findById(id);
       if (!dealer) {
         return res.status(404).json({ error: 'Dealer not found' });
       }
