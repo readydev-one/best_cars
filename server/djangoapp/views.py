@@ -83,6 +83,45 @@ def registration(request):
         return JsonResponse(data)
 # ...
 
+@csrf_exempt
+def get_car_list(request):
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Only GET method is allowed'}, status=405)
+
+    # Check if database is empty and populate if needed
+    if CarMake.objects.count() == 0:
+        initiate()
+
+    # Get pagination parameters
+    try:
+        offset = int(request.GET.get('offset', 0))
+        limit = int(request.GET.get('limit', 30))
+    except ValueError:
+        return JsonResponse({'error': 'Offset and limit must be integers'}, status=400)
+
+    # Fetch all car models with related makes
+    all_cars = list(CarModel.objects.select_related('car_make').all())
+    random.shuffle(all_cars)  # Randomize the list
+
+    # Paginate
+    paginated_cars = all_cars[offset:offset+limit]
+
+    if not paginated_cars:
+        return JsonResponse({'message': 'End of List'}, status=200)
+
+    car_data = [{
+        'id': car.id,
+        'name': car.name,
+        'make': car.car_make.name,
+        'type': car.type,
+        'year': car.year,
+        'fuel_efficiency': car.fuel_efficiency,
+        'price': float(car.price),
+        'image_url': car.image_url
+    } for car in paginated_cars]
+
+    return JsonResponse({'CarModels': car_data}, status=200)
+
 # # Update the `get_dealerships` view to render the index page with
 # a list of dealerships
 # def get_dealerships(request):
