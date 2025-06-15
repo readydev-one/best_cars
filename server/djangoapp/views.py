@@ -10,6 +10,7 @@
 
 
 from .populate import initiate
+from .models import CarMake, CarModel
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
 from django.contrib.auth import login, authenticate, logout
@@ -19,6 +20,7 @@ from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 import json
 import logging
+
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -83,44 +85,17 @@ def registration(request):
         return JsonResponse(data)
 # ...
 
-@csrf_exempt
-def get_car_list(request):
-    if request.method != 'GET':
-        return JsonResponse({'error': 'Only GET method is allowed'}, status=405)
-
-    # Check if database is empty and populate if needed
-    if CarMake.objects.count() == 0:
+def get_cars(request):
+    count = CarMake.objects.filter().count()
+    print(count)
+    if(count == 0):
         initiate()
+    car_models = CarModel.objects.select_related('car_make')
+    cars = []
+    for car_model in car_models:
+        cars.append({"CarModel": car_model.name, "CarMake": car_model.car_make.name})
+    return JsonResponse({"CarModels":cars})
 
-    # Get pagination parameters
-    try:
-        offset = int(request.GET.get('offset', 0))
-        limit = int(request.GET.get('limit', 30))
-    except ValueError:
-        return JsonResponse({'error': 'Offset and limit must be integers'}, status=400)
-
-    # Fetch all car models with related makes
-    all_cars = list(CarModel.objects.select_related('car_make').all())
-    random.shuffle(all_cars)  # Randomize the list
-
-    # Paginate
-    paginated_cars = all_cars[offset:offset+limit]
-
-    if not paginated_cars:
-        return JsonResponse({'message': 'End of List'}, status=200)
-
-    car_data = [{
-        'id': car.id,
-        'name': car.name,
-        'make': car.car_make.name,
-        'type': car.type,
-        'year': car.year,
-        'fuel_efficiency': car.fuel_efficiency,
-        'price': float(car.price),
-        'image_url': car.image_url
-    } for car in paginated_cars]
-
-    return JsonResponse({'CarModels': car_data}, status=200)
 
 # # Update the `get_dealerships` view to render the index page with
 # a list of dealerships
