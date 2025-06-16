@@ -21,7 +21,7 @@ class CarModelAdmin(admin.ModelAdmin):
     search_fields = ("name",)
 
     def get_readonly_fields(self, request, obj=None):
-        # If the listing is imported, make some fields readonly to avoid accidental edits
+
         if obj and obj.is_imported:
             return self.readonly_fields + ("price", "car_model")
         return self.readonly_fields

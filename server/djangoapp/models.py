@@ -1,7 +1,8 @@
 # Uncomment the following imports before adding the Model code
 
 from django.db import models
-from django.utils.timezone import now
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 
@@ -19,9 +20,6 @@ class CarMake(models.Model):
 
 
 # <HINT> Create a Car Model model `class CarModel(models.Model):`:
-from django.db import models
-from django.core.validators import MaxValueValidator, MinValueValidator
-from datetime import datetime
 
 
 class CarModel(models.Model):
