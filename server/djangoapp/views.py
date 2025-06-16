@@ -11,14 +11,12 @@
 
 from .populate import initiate
 from .models import CarMake, CarModel
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
 from .restapis import get_request, analyze_review_sentiments, post_review
-from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
+from django.http import JsonResponse, HttpResponse
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
-from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
-from datetime import datetime
 import json
 import logging
 
@@ -61,7 +59,7 @@ def logout_request(request):
 def registration(request):
     context = {}
 
-    # Load JSON data from the request body
+# Load JSON data from the request body
     data = json.loads(request.body)
     username = data["userName"]
     password = data["password"]
@@ -69,9 +67,8 @@ def registration(request):
     last_name = data["lastName"]
     email = data["email"]
     username_exist = False
-    email_exist = False
     try:
-        # Check if user already exists
+# Check if user already exists
         User.objects.get(username=username)
         username_exist = True
     except BaseException:
@@ -162,12 +159,12 @@ def get_dealer_details(request, dealer_id):
 def add_review(request):
     if not request.user.is_anonymous:
         data = json.loads(request.body)
-        try:
-            response = post_review(data)
-            return JsonResponse({"status": 200})
-        except BaseException:
-            return JsonResponse(
-                {"status": 401, "message": "Error in posting review"})
+    try:
+        response = post_review(data)
+        return JsonResponse({"status": 200})
+    except BaseException:
+        return JsonResponse(
+            {"status": 401, "message": "Error in posting review"})
     else:
         return JsonResponse({"status": 403, "message": "Unauthorized"})
 
