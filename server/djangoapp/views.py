@@ -11,9 +11,8 @@
 
 from .populate import initiate
 from .models import CarMake, CarModel
-from django.shortcuts import redirect, get_object_or_404
 from .restapis import get_request, analyze_review_sentiments, post_review
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
@@ -68,7 +67,7 @@ def registration(request):
     email = data["email"]
     username_exist = False
     try:
-# Check if user already exists
+    # Check if user already exists
         User.objects.get(username=username)
         username_exist = True
     except BaseException:
