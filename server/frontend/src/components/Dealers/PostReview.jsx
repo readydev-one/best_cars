@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import "./Dealers.css";
 import "../assets/style.css";
-import Header from '../Header/Header';
+import { useNavigate } from 'react-router-dom';
+import Header from "../Header/Header.jsx";
 
 
 const PostReview = () => {
@@ -12,6 +13,8 @@ const PostReview = () => {
   const [year, setYear] = useState("");
   const [date, setDate] = useState("");
   const [carmodels, setCarmodels] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
   let curr_url = window.location.href;
   let root_url = curr_url.substring(0,curr_url.indexOf("postreview"));
@@ -31,6 +34,7 @@ const PostReview = () => {
       alert("All details are mandatory")
       return;
     }
+    
 
     let model_split = model.split(" ");
     let make_chosen = model_split[0];
@@ -47,21 +51,30 @@ const PostReview = () => {
       "car_year": year,
     });
 
-    console.log(jsoninput);
-    const res = await fetch(review_url, {
-      method: "POST",
-      headers: {
-          "Content-Type": "application/json",
-      },
-      body: jsoninput,
-  });
-
-  const json = await res.json();
-  if (json.status === 200) {
-      window.location.href = window.location.origin+"/dealer/"+id;
-  }
-
-  }
+    try {
+        const res = await fetch(review_url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: jsoninput,
+        });
+    
+        const json = await res.json();
+    
+        if (json.status === 200) {
+          setShowModal(true);
+          setTimeout(() => {
+            navigate(`/dealer/${id}`);
+          }, 2000);
+        } else {
+          alert("Something went wrong. Please try again.");
+        }
+      } catch (err) {
+        console.error("Error submitting review:", err);
+        alert("Network error. Please try again.");
+      };
+    }
   const get_dealer = async ()=>{
     const res = await fetch(dealer_url, {
       method: "GET"
@@ -117,6 +130,13 @@ const PostReview = () => {
       <button className='postreview' onClick={postreview}>Post Review</button>
       </div>
     </div>
+        {showModal && (
+    <div className="modal">
+        <div className="modal-content">
+        <h3>✅ Your review has been added successfully!</h3>
+        </div>
+    </div>
+    )}
     </div>
   )
 }
