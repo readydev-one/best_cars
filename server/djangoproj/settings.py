@@ -29,10 +29,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     "localhost",
-    "toricamstudi-8000.theiadockernext-1-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai",
+    "toricamstudi-8000.theiadockernext-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai",
 ]
 CSRF_TRUSTED_ORIGINS = [
-    "https://toricamstudi-8000.theiadockernext-1-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai"
+    "https://toricamstudi-8000.theiadockernext-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai"
 ]
 
 REST_FRAMEWORK = {
